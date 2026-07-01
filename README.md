@@ -1,4 +1,5 @@
 # 🔐 Playfair Cipher
+![Project Preview](preview.png)
 
 An interactive web application that demonstrates the Playfair Cipher encryption algorithm. The application allows users to encrypt and decrypt messages while visualizing the generated 5×5 key matrix and the transformation of each letter pair.
 
