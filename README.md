@@ -1,8 +1,9 @@
 # 🔐 Playfair Cipher
+An interactive web application that demonstrates the Playfair Cipher encryption algorithm. The application allows users to encrypt and decrypt messages while visualizing the generated 5×5 key matrix and the transformation of each letter pair.
 
 <img width="1055" height="1169" alt="preview png" src="https://github.com/user-attachments/assets/21e0b899-ff0e-45d1-b126-0b2ffa01f211" />
 
-An interactive web application that demonstrates the Playfair Cipher encryption algorithm. The application allows users to encrypt and decrypt messages while visualizing the generated 5×5 key matrix and the transformation of each letter pair.
+
 
 ## 🌐 Live Demo
 
