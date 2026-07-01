@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playfair Cipher - CS 320</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=EB+Garamond:wght@400;500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f5f0e8;
+      --card: #ede7d9;
+      --card2: #e2d9c8;
+      --text: #1c1a17;
+      --text2: #7a7260;
+      --text3: #b5ad9d;
+      --navy: #1e3050;
+      --navy2: #2c4570;
+      --red: #8b2635;
+      --border: #cec5b0;
+      --border2: #a89d88;
+      --serif: 'Playfair Display', Georgia, serif;
+      --body: 'EB Garamond', Georgia, serif;
+      --mono: 'Courier Prime', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      min-height: 100vh;
+      padding: 40px 24px 70px;
+    }
+
+    .wrapper {
+      max-width: 1080px;
+      margin: auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .badge {
+      display: inline-block;
+      border: 1px solid var(--border2);
+      padding: 6px 18px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text2);
+      background: var(--card);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.1rem, 5vw, 3.5rem);
+      margin-bottom: 8px;
+    }
+
+    h1 em {
+      color: var(--red);
+      font-style: italic;
+    }
+
+    .sub {
+      color: var(--text2);
+      font-style: italic;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 760px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 24px;
+      position: relative;
+      box-shadow: 2px 3px 14px rgba(0,0,0,.06);
+    }
+
+    .card-title {
+      font-family: var(--serif);
+      font-size: .8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text2);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .mode-row {
+      display: flex;
+      border: 1px solid var(--border2);
+      margin-bottom: 20px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text2);
+      cursor: pointer;
+    }
+
+    .mode-btn + .mode-btn {
+      border-left: 1px solid var(--border2);
+    }
+
+    .mode-btn.active {
+      background: var(--navy);
+      color: white;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text2);
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1px solid var(--border2);
+      background: #f8f5ef;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      outline: none;
+      resize: none;
+    }
+
+    .field textarea {
+      min-height: 120px;
+      line-height: 1.5;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn {
+      padding: 11px 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: 1px solid;
+      cursor: pointer;
+    }
+
+    .btn-run {
+      flex: 1;
+      background: var(--navy);
+      border-color: var(--navy);
+      color: white;
+    }
+
+    .btn-run:hover {
+      background: var(--navy2);
+      border-color: var(--navy2);
+    }
+
+    .btn-clear {
+      background: transparent;
+      color: var(--text2);
+      border-color: var(--border2);
+    }
+
+    .divider {
+      margin: 22px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text3);
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .out-label {
+      margin-bottom: 7px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text2);
+    }
+
+    .out-box {
+      min-height: 60px;
+      background: #f8f5ef;
+      border: 1px solid var(--border2);
+      padding: 14px 14px 34px;
+      font-family: var(--mono);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--navy);
+      position: relative;
+      word-break: break-word;
+    }
+
+    .out-box.empty {
+      color: var(--text3);
+      font-style: italic;
+      font-family: var(--body);
+    }
+
+    .out-box.error {
+      color: var(--red);
+      font-size: 13px;
+    }
+
+    .copy-btn {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text2);
+      font-size: 9px;
+      padding: 4px 10px;
+      font-family: var(--mono);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .prep-note {
+      margin-top: 9px;
+      color: var(--text2);
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    .grid-wrap {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-top: 4px;
+    }
+
+    .grid-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8f5ef;
+      border: 1px solid var(--border);
+      font-family: var(--serif);
+      font-size: clamp(14px, 2.2vw, 22px);
+      font-weight: 600;
+    }
+
+    .grid-cell.key-letter {
+      background: var(--navy);
+      color: white;
+      border-color: var(--navy);
+    }
+
+    .grid-legend {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text2);
+    }
+
+    .legend-box {
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--border2);
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .legend-key {
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+
+    .grid-note {
+      margin-top: 13px;
+      padding-left: 12px;
+      border-left: 2px solid var(--border2);
+      color: var(--text2);
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .steps-scroll {
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .steps-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .steps-table th {
+      text-align: left;
+      padding: 7px 10px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text2);
+      background: var(--card2);
+      border-bottom: 1px solid var(--border2);
+    }
+
+    .steps-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pair-in {
+      color: var(--navy);
+      font-weight: 700;
+      letter-spacing: 3px;
+    }
+
+    .pair-out {
+      color: var(--red);
+      font-weight: 700;
+      letter-spacing: 3px;
+    }
+
+    .rule-text {
+      color: var(--text2);
+      font-size: 11px;
+    }
+
+    .steps-empty {
+      color: var(--text3);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <header>
+      <div class="badge">King Faisal University · CS 320 · Computer Security</div>
+      <h1>The <em>Playfair</em> Cipher</h1>
+      <p class="sub">An Interactive Encryption & Decryption System</p>
+    </header>
+
+    <div class="main-grid">
+      <div class="card">
+        <div class="card-title">Cipher Engine</div>
+
+        <div class="mode-row">
+          <button class="mode-btn active" id="encryptBtn" onclick="changeMode('encrypt')">Encrypt</button>
+          <button class="mode-btn" id="decryptBtn" onclick="changeMode('decrypt')">Decrypt</button>
+        </div>
+
+        <div class="field">
+          <label for="keywordInput">Keyword</label>
+          <input type="text" id="keywordInput" placeholder="e.g. MONARCHY" oninput="updateGrid()">
+        </div>
+
+        <div class="field">
+          <label for="messageInput" id="messageLabel">Plaintext</label>
+          <textarea id="messageInput" placeholder="Enter the message to encrypt..." oninput="resetOutput()"></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-run" onclick="runCipher()">Run Cipher</button>
+          <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+        </div>
+
+        <div class="divider">✦</div>
+
+        <div class="out-label" id="resultLabel">Ciphertext</div>
+        <div class="out-box empty" id="resultBox">
+          Output will appear here...
+          <button class="copy-btn" onclick="copyResult()">Copy</button>
+        </div>
+
+        <p class="prep-note" id="prepText"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">5 × 5 Key Grid</div>
+        <div class="grid-wrap" id="gridBox"></div>
+
+        <div class="grid-legend">
+          <div><span class="legend-box legend-key"></span>Keyword letters</div>
+          <div><span class="legend-box"></span>Remaining alphabet</div>
+        </div>
+
+        <p class="grid-note">
+          I and J share one cell. Duplicate letters are removed from the keyword first.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Digraph Breakdown</div>
+      <div id="stepsBox">
+        <p class="steps-empty">Run the cipher to see each pair.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentMode = "encrypt";
+
+    function cleanText(text) {
+      return text.toUpperCase().replace(/J/g, "I").replace(/[^A-Z]/g, "");
+    }
+
+    function removeDuplicates(text) {
+      let result = "";
+      for (let ch of text) {
+        if (!result.includes(ch)) {
+          result += ch;
+        }
+      }
+      return result;
+    }
+
+    function makeGrid(keyword) {
+      let cleanKey = cleanText(keyword);
+      cleanKey = removeDuplicates(cleanKey);
+
+      let alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+      let fullText = cleanKey;
+
+      for (let ch of alphabet) {
+        if (!fullText.includes(ch)) {
+          fullText += ch;
+        }
+      }
+
+      return fullText.split("");
+    }
+
+    function findPosition(grid, letter) {
+      let index = grid.indexOf(letter);
+      return {
+        row: Math.floor(index / 5),
+        col: index % 5
+      };
+    }
+
+    function prepareText(text) {
+      let clean = cleanText(text);
+      let result = "";
+      let i = 0;
+
+      while (i < clean.length) {
+        let first = clean[i];
+        let second = clean[i + 1];
+
+        if (!second) {
+          result += first + "X";
+          i++;
+        } else if (first === second) {
+          result += first + "X";
+          i++;
+        } else {
+          result += first + second;
+          i += 2;
+        }
+      }
+
+      return result;
+    }
+
+    function makePairs(text) {
+      let pairs = [];
+      for (let i = 0; i < text.length; i += 2) {
+        pairs.push(text[i] + text[i + 1]);
+      }
+      return pairs;
+    }
+
+    function processPair(grid, first, second, isEncrypt) {
+      let pos1 = findPosition(grid, first);
+      let pos2 = findPosition(grid, second);
+      let move = isEncrypt ? 1 : -1;
+
+      if (pos1.row === pos2.row) {
+        return {
+          first: grid[pos1.row * 5 + (pos1.col + move + 5) % 5],
+          second: grid[pos2.row * 5 + (pos2.col + move + 5) % 5],
+          rule: isEncrypt ? "Same row → shift right" : "Same row → shift left"
+        };
+      }
+
+      if (pos1.col === pos2.col) {
+        return {
+          first: grid[((pos1.row + move + 5) % 5) * 5 + pos1.col],
+          second: grid[((pos2.row + move + 5) % 5) * 5 + pos2.col],
+          rule: isEncrypt ? "Same column → shift down" : "Same column → shift up"
+        };
+      }
+
+      return {
+        first: grid[pos1.row * 5 + pos2.col],
+        second: grid[pos2.row * 5 + pos1.col],
+        rule: "Rectangle → swap columns"
+      };
+    }
+
+    function removeExtraX(text) {
+      let result = "";
+
+      for (let i = 0; i < text.length; i++) {
+        if (
+          i > 0 &&
+          i < text.length - 1 &&
+          text[i] === "X" &&
+          text[i - 1] === text[i + 1]
+        ) {
+          continue;
+        }
+
+        result += text[i];
+      }
+
+      if (result.endsWith("X")) {
+        result = result.slice(0, -1);
+      }
+
+      return result;
+    }
+
+    function runPlayfair(keyword, message, isEncrypt) {
+      if (!keyword.trim()) {
+        return { error: "Please enter a keyword." };
+      }
+
+      if (!message.trim()) {
+        return { error: "Please enter some text." };
+      }
+
+      let grid = makeGrid(keyword);
+      let text = isEncrypt ? prepareText(message) : cleanText(message);
+
+      if (!isEncrypt && text.length % 2 !== 0) {
+        return { error: "Ciphertext must have an even number of letters." };
+      }
+
+      let pairs = makePairs(text);
+      let output = "";
+      let steps = [];
+
+      for (let pair of pairs) {
+        let result = processPair(grid, pair[0], pair[1], isEncrypt);
+        output += result.first + result.second;
+        steps.push({
+          inputPair: pair,
+          outputPair: result.first + result.second,
+          rule: result.rule
+        });
+      }
+
+      if (!isEncrypt) {
+        output = removeExtraX(output);
+      }
+
+      return {
+        grid: grid,
+        preparedText: text,
+        output: output,
+        steps: steps
+      };
+    }
+
+    function changeMode(mode) {
+      currentMode = mode;
+
+      document.getElementById("encryptBtn").className = "mode-btn" + (mode === "encrypt" ? " active" : "");
+      document.getElementById("decryptBtn").className = "mode-btn" + (mode === "decrypt" ? " active" : "");
+
+      document.getElementById("messageLabel").textContent = mode === "encrypt" ? "Plaintext" : "Ciphertext";
+      document.getElementById("resultLabel").textContent = mode === "encrypt" ? "Ciphertext" : "Plaintext";
+      document.getElementById("messageInput").placeholder = mode === "encrypt"
+        ? "Enter the message to encrypt..."
+        : "Enter ciphertext to decrypt...";
+
+      resetOutput();
+    }
+
+    function updateGrid() {
+      let keyword = document.getElementById("keywordInput").value;
+      let grid = makeGrid(keyword);
+      let cleanKey = removeDuplicates(cleanText(keyword));
+      showGrid(grid, cleanKey);
+    }
+
+    function runCipher() {
+      let keyword = document.getElementById("keywordInput").value;
+      let message = document.getElementById("messageInput").value;
+      let result = runPlayfair(keyword, message, currentMode === "encrypt");
+
+      if (result.error) {
+        document.getElementById("resultBox").className = "out-box error";
+        document.getElementById("resultBox").innerHTML =
+          result.error + '<button class="copy-btn" onclick="copyResult()">Copy</button>';
+        document.getElementById("prepText").textContent = "";
+        document.getElementById("stepsBox").innerHTML = '<p class="steps-empty">' + result.error + '</p>';
+        return;
+      }
+
+      document.getElementById("resultBox").className = "out-box";
+      document.getElementById("resultBox").innerHTML =
+        result.output + '<button class="copy-btn" onclick="copyResult()">Copy</button>';
+
+      if (currentMode === "encrypt") {
+        document.getElementById("prepText").textContent =
+          "Prepared text: " + result.preparedText + " (" + (result.preparedText.length / 2) + " pairs)";
+      } else {
+        document.getElementById("prepText").textContent =
+          "Processed " + (result.preparedText.length / 2) + " pairs";
+      }
+
+      let cleanKey = removeDuplicates(cleanText(keyword));
+      showGrid(result.grid, cleanKey);
+      showSteps(result.steps);
+    }
+
+    function showGrid(grid, cleanKey) {
+      let gridBox = document.getElementById("gridBox");
+      let keyLetters = cleanKey.split("");
+      let html = "";
+
+      for (let ch of grid) {
+        let extraClass = keyLetters.includes(ch) ? " key-letter" : "";
+        html += '<div class="grid-cell' + extraClass + '">' + ch + '</div>';
+      }
+
+      gridBox.innerHTML = html;
+    }
+
+    function showSteps(steps) {
+      if (!steps.length) {
+        document.getElementById("stepsBox").innerHTML =
+          '<p class="steps-empty">No steps to display.</p>';
+        return;
+      }
+
+      let rows = "";
+
+      for (let i = 0; i < steps.length; i++) {
+        rows += `
+          <tr>
+            <td>${String(i + 1).padStart(2, "0")}</td>
+            <td class="pair-in">${steps[i].inputPair[0]} ${steps[i].inputPair[1]}</td>
+            <td>→</td>
+            <td class="pair-out">${steps[i].outputPair[0]} ${steps[i].outputPair[1]}</td>
+            <td class="rule-text">${steps[i].rule}</td>
+          </tr>
+        `;
+      }
+
+      document.getElementById("stepsBox").innerHTML = `
+        <div class="steps-scroll">
+          <table class="steps-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Input Pair</th>
+                <th></th>
+                <th>Output Pair</th>
+                <th>Rule Applied</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function resetOutput() {
+      document.getElementById("resultBox").className = "out-box empty";
+      document.getElementById("resultBox").innerHTML =
+        'Output will appear here...<button class="copy-btn" onclick="copyResult()">Copy</button>';
+      document.getElementById("prepText").textContent = "";
+    }
+
+    function clearAll() {
+      document.getElementById("keywordInput").value = "";
+      document.getElementById("messageInput").value = "";
+      resetOutput();
+      updateGrid();
+      document.getElementById("stepsBox").innerHTML =
+        '<p class="steps-empty">Run the cipher to see each pair.</p>';
+    }
+
+    function copyResult() {
+      let text = document.getElementById("resultBox").textContent.replace("Copy", "").trim();
+      if (!text || text.includes("Output will appear")) return;
+
+      navigator.clipboard.writeText(text);
+      let btn = document.querySelector(".copy-btn");
+      btn.textContent = "Copied";
+      setTimeout(() => {
+        btn.textContent = "Copy";
+      }, 1500);
+    }
+
+    updateGrid();
+  </script>
+</body>
+</html>
