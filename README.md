@@ -44,3 +44,12 @@ https://sarask2.github.io/playfair-cipher/
 
 This project was developed as part of the **CS 320 – Computer Security** course to demonstrate the implementation of the Playfair Cipher and provide a simple visual explanation of how the algorithm works.
 
+
+---
+
+## 👭 Developed By
+
+* **Sara** 
+* **Iqbal**
+
+
